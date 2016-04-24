@@ -54,27 +54,47 @@ app.get('/tips', function(req, res) {
 });
 
 app.post('/tips', function(req, res){
-	res.send("posted one tip");
+	//res.send("posted one tip");
+	MongoClient.connect(url, function(err, db) {
+		assert.equal(null, err);
+		insertDocument(db, data, function() {
+			db.close();
+		});
+	});
 });
 
-app.put('/tips/:id', function(req, res){
+app.put('/tips/:name', function(req, res){
 	res.send("update one tip");
 });
 
-app.get('/tips/:id', function(req, res) {
+app.get('/tips/name/:name', function(req, res) {
 	//res.send("get specific tip: " + req.params.id);
-	var rst = "";
+	var rst = [];
 	MongoClient.connect(url, function(err, db) {
 		assert.equal(null, err);
-		findDocument(db, {'name': req.params.id}, function(data){
+		findDocByKey(db, {'name': req.params.name}, function(data){
 			if (data == null) {
 				db.close();
 				res.send(rst);
 			}
-			rst = data;
+			rst.push(data);
 		});
 	});
+});
 
+app.get('/tips/user/:userId', function(req, res) {
+	//res.send("get specific tip: " + req.params.id);
+	var rst = [];
+	MongoClient.connect(url, function(err, db) {
+		assert.equal(null, err);
+		findDocByKey(db, {'userId': req.params.userId}, function(data){
+			if (data == null) {
+				db.close();
+				res.send(rst);
+			}
+			rst.push(data);
+		});
+	});
 });
 
 
@@ -87,14 +107,17 @@ var insertDocument = function(db, data, callback) {
    db.collection('tips').insertOne(data, function(err, result) {
     assert.equal(err, null);
     console.log("Inserted a document into the tips collection.");
+    console.log(result);
     callback();
   });
 };
 
-var findDocument = function(db, key, callback) {
+var findDocByKey = function(db, key, callback) {
 	var cursor = db.collection('tips').find(key);
+	var rst = [];
 	cursor.each(function(err, doc) {
       assert.equal(err, null);
+      rst.push(doc);
       callback(doc);
    });
-}
+};
