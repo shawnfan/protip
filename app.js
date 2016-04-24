@@ -6,6 +6,7 @@ app.get('/', function(req, res) {
 });
 
 app.listen(process.env.PORT || 1024, function() {
+	console.log(process.env.DB_USERNAME);
 	console.log("Hey, Protip is running at port 1024!");
 });
 
@@ -13,7 +14,7 @@ app.listen(process.env.PORT || 1024, function() {
 	RESTful API
 */
 app.get('/tips', function(req, res) {
-	res.send("get all tips");
+	res.send("get all tips " + process.env.DB_USERNAME);
 });
 
 app.post('/tips', function(req, res){
