@@ -5,7 +5,7 @@ app.get('/', function(req, res) {
  res.send("Hi, this is Protip!");
 });
 
-app.listen(1024, function() {
+app.listen(process.env.PORT || 1024 function() {
 	console.log("Hey, Protip is running at port 1024!");
 });
 
