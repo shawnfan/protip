@@ -2,44 +2,18 @@ var express = require('express');
 var app = express();
 var assert = require('assert');
 var MongoClient = require('mongodb').MongoClient;
+var bodyParser = require('body-parser');
 
 var port = process.env.PORT || 1024;
 var url = process.env.MONGODB_URI || "mongodb://localhost:27017/test";
 
-/*
-	Mongo DB Object Modeling
-*/
-/*
-mongoose.connect(uristr, function(err, res) {
-	if (err) {
-		console.log ('ERROR connecting to: ' + uristr + '. ' + err);
-	} else {
-		console.log ('Succeeded connected to: ' + uristr);
-	}
-});
 
-var userSchema = new mongoose.Schema({
-	name: {
-		first: String,
-		last: String
-	},
-	email: String
-});
-var tipSchema = new mongoose.Schema({
-	name: String,
-	content: String
-	userId: String
-});
+/*
+	Midware
 */
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
-MongoClient.connect(url, function(err, db) {
-	if (err) {
-		console.log ('ERROR connecting to: ' + url + '. ' + err);
-	} else {
-		db.close();
-		console.log ('Succeeded connected to: ' + url + " and closed");
-	}
-})
 
 /*
 	RESTful API
@@ -49,22 +23,27 @@ app.get('/', function(req, res) {
 });
 
 app.get('/tips', function(req, res) {
-	res.send("get all tips " + process.env.DB_USERNAME);
-
+	res.send("Haven't implement 'all tips' yet");
 });
 
 app.post('/tips', function(req, res){
-	//res.send("posted one tip");
+	var data = {
+		name: req.body.name,
+		content: req.body.content,
+		userId: req.body.userId
+	};
+
 	MongoClient.connect(url, function(err, db) {
 		assert.equal(null, err);
-		insertDocument(db, data, function() {
+		insertDocument(db, data, function(result) {
+			res.send(result);
 			db.close();
 		});
 	});
 });
 
 app.put('/tips/:name', function(req, res){
-	res.send("update one tip");
+	res.send("//TODO: update one tip.");
 });
 
 app.get('/tips/name/:name', function(req, res) {
@@ -107,8 +86,7 @@ var insertDocument = function(db, data, callback) {
    db.collection('tips').insertOne(data, function(err, result) {
     assert.equal(err, null);
     console.log("Inserted a document into the tips collection.");
-    console.log(result);
-    callback();
+    callback(result.ops[0]);
   });
 };
 
